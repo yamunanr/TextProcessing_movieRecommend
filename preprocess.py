@@ -78,7 +78,7 @@ popular_movies(data)
 
 # Text-preprocessing
 # def text_processing(df):
-print("Data used for recommender processing\n", data['overview'].head(5))
+#print("Data used for recommender processing\n", data['overview'].head(5))
 # Define a TF-IDF Vectorizer Object. Remove all english stop words such as 'the', 'a'
 tfidf = TfidfVectorizer(stop_words='english')
 # Replace NaN with an empty string
