@@ -13,6 +13,10 @@ import plotly.graph_objs as go
 import plotly.offline as py
 import plotly.figure_factory as ff
 import matplotlib.pyplot as plt
+# Import TfIdfVectorizer from scikit-learn
+from sklearn.feature_extraction.text import TfidfVectorizer
+# Import linear_kernel
+from sklearn.metrics.pairwise import linear_kernel
 
 credit_movies = pd.read_csv('./Data/tmdb_5000_credits.csv', sep=',')
 movies = pd.read_csv('./Data/tmdb_5000_movies.csv')
@@ -68,17 +72,50 @@ def popular_movies(df):
     pm = df.sort_values('popularity', ascending=False).head(15)
     fig = px.bar(pm, x="title", y=["popularity"], title="Top 15 Popular Movies")
     fig.show()
-    print(pm)
 
 
-popular_movies(data)
+# popular_movies(data)
 
-# print(data.sort_values('popularity', ascending=False))
+# Text-preprocessing
+# def text_processing(df):
+print("Data used for recommender processing\n", data['overview'].head(5))
+# Define a TF-IDF Vectorizer Object. Remove all english stop words such as 'the', 'a'
+tfidf = TfidfVectorizer(stop_words='english')
+# Replace NaN with an empty string
+data['overview'] = data['overview'].fillna('')
+# Construct the required TF-IDF matrix by fitting and transforming the data
+tfidf_matrix = tfidf.fit_transform(data['overview'])
 
-# credit_movies_report = credit_movies.profile_report(title='EDA for Credit Data')
-# credit_movies_report.to_file(output_file="credit_movies.html")
-# print("\n View the report in credit_movies.html from your PC...\n ------------------------------------")
+# Compute the cosine similarity matrix
+cosine_sim = linear_kernel(tfidf_matrix, tfidf_matrix)
 
-# movies_report = movies.profile_report(title='EDA for Movies Data')
-# movies_report.to_file(output_file="movies.html")
-# print("\n View the report in movies.html from your PC...\n ------------------------------------")
+# Construct a reverse map of indices and movie titles
+indices = pd.Series(data.index, index=data['title']).drop_duplicates()
+
+
+# Function that takes in movie title as input and outputs most similar movies
+def get_recommendations(cosine_sim=cosine_sim):
+    # Get the index of the movie that matches the title
+    title = input("Enter Movie Name:")
+
+    idx = indices[title]
+
+    # Get the pairwsie similarity scores of all movies with that movie
+    sim_scores = list(enumerate(cosine_sim[idx]))
+
+    # Sort the movies based on the similarity scores
+    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+
+    # Get the scores of the 10 most similar movies
+    sim_scores = sim_scores[1:11]
+
+    # Get the movie indices
+    movie_indices = [i[0] for i in sim_scores]
+
+    # Return the top 10 most similar movies
+    print("10 Most Similar Movies to Recommend", data['title'].iloc[movie_indices])
+    return data['title'].iloc[movie_indices]
+
+
+get_recommendations()
+
