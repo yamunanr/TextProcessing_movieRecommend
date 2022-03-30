@@ -38,13 +38,13 @@ def filtering(df):
     :return: filtered movies
     """
     weighted_avg_rating = df['vote_average'].mean()
-    print("Mean rating for all movies::", weighted_avg_rating)
+    #print("Mean rating for all movies::", weighted_avg_rating)
     minimum_votes = df['vote_count'].quantile(
         0.9)  # Using 90th percentile, movie votes to be equal to or more than 90% as cutoff --> feature in charts
-    print("min_votes_movies:", minimum_votes)
+    #print("min_votes_movies:", minimum_votes)
     # filter movies
     q_movies = df.copy().loc[df['vote_count'] >= minimum_votes]
-    print('Filtered Movies: \n ---------------------------\n', q_movies)
+    #print('Filtered Movies: \n ---------------------------\n', q_movies)
 
     def weighted_rating(x=df, m=minimum_votes, C=weighted_avg_rating):
         v = x['vote_count']
@@ -58,7 +58,7 @@ def filtering(df):
     q_movies = q_movies.sort_values('score', ascending=False)
     # Print the top 15 movies
     q_movies = q_movies[['title', 'vote_count', 'vote_average', 'score']]
-    print(q_movies)
+    #print(q_movies)
     return q_movies
 
 
@@ -74,7 +74,7 @@ def popular_movies(df):
     fig.show()
 
 
-# popular_movies(data)
+popular_movies(data)
 
 # Text-preprocessing
 # def text_processing(df):
